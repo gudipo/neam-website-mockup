@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>neam IT-Services GmbH – IT-Sicherheit & IT-Services aus einer Hand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Khand:wght@700&family=IBM+Plex+Sans:wght@200;400;600&family=IBM+Plex+Sans+Condensed:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #0996d3;
+    --cyan-light: #20bbef;
+    --cyan-hero: #23bbea;
+    --magenta: #d71784;
+    --magenta-dark: #af0f82;
+    --dark-blue: #1e4b8c;
+    --dark-bg: #14171c;
+    --dark-2: #3d3f40;
+    --text: #000000;
+    --text-muted: #676767;
+    --text-light: #c8c8c8;
+    --white: #ffffff;
+    --gray-light: #f5f5f5;
+    --gray-mid: #e0e0e0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ─── DRAFT BAR ─────────────────────────────────────────────── */
+  .draft-bar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: #f59e0b;
+    color: #1c1c1c;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    padding: 9px 20px;
+    letter-spacing: 0.02em;
+    border-bottom: 2px solid #d97706;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .draft-bar span.label {
+    background: #1c1c1c;
+    color: #f59e0b;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ─── ANNOTATION TOOLTIPS ───────────────────────────────────── */
+  .anno {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+  }
+  .anno-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: background 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .anno-btn:hover { background: rgba(255,255,255,0.3); }
+  .anno-dark .anno-btn {
+    background: rgba(9,150,211,0.15);
+    border-color: rgba(9,150,211,0.5);
+    color: var(--cyan);
+  }
+  .anno-tooltip {
+    display: none;
+    position: absolute;
+    top: 36px;
+    right: 0;
+    width: 260px;
+    background: #1c1c1c;
+    color: #e5e5e5;
+    font-size: 12.5px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    z-index: 200;
+  }
+  .anno-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    background: #1c1c1c;
+    transform: rotate(45deg);
+    border-radius: 2px;
+  }
+  .anno-tooltip strong {
+    display: block;
+    color: #f59e0b;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .anno:hover .anno-tooltip { display: block; }
+
+  /* ─── NAVIGATION ────────────────────────────────────────────── */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-mid);
+    position: sticky;
+    top: 41px;
+    z-index: 1000;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .nav-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    gap: 20px;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .nav-logo .logo-main {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--cyan);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .nav-logo .logo-sub {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 200;
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    align-self: center;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-links a {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  .nav-links a:hover { color: var(--cyan); background: rgba(9,150,211,0.06); }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .nav-phone {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-phone:hover { color: var(--cyan); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 50px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    padding: 11px 24px;
+    line-height: 1;
+  }
+  .btn-primary { background: var(--cyan); color: var(--white); }
+  .btn-primary:hover { background: #0887bd; }
+  .btn-magenta { background: var(--magenta); color: var(--white); border-color: var(--magenta); }
+  .btn-magenta:hover { background: var(--magenta-dark); border-color: var(--magenta-dark); }
+  .btn-outline-cyan { background: transparent; color: var(--cyan-hero); border-color: var(--cyan-hero); }
+  .btn-outline-cyan:hover { background: rgba(35,187,234,0.12); }
+  .btn-white { background: var(--white); color: var(--magenta); }
+  .btn-white:hover { background: #f0f0f0; }
+  .btn-lg { padding: 14px 32px; font-size: 15px; }
+
+  /* ─── SECTION UTILS ─────────────────────────────────────────── */
+  section { position: relative; }
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .section-pad { padding: 90px 0; }
+  .section-pad-sm { padding: 60px 0; }
+  .divider {
+    width: 60px;
+    height: 5px;
+    background: var(--cyan);
+    margin-bottom: 22px;
+    border-radius: 3px;
+  }
+  .divider-black { background: #000; }
+  .divider-white { background: var(--white); }
+  .divider-magenta { background: var(--magenta); }
+  .section-label {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 42px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .section-sub {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: 12px;
+    max-width: 680px;
+  }
+  .tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.9);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .tag-dark {
+    background: rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.65);
+    border-color: rgba(0,0,0,0.12);
+  }
+
+  /* ─── HERO ──────────────────────────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #0d2347 55%, var(--dark-blue) 100%);
+    min-height: 680px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(9,150,211,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(215,23,132,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 80px 24px 90px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 0.04em;
+    margin-bottom: 30px;
+    backdrop-filter: blur(8px);
+  }
+  .hero-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan-hero);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .hero h1 {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: clamp(52px, 8vw, 92px);
+    color: var(--cyan-hero);
+    text-transform: uppercase;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    max-width: 750px;
+  }
+  .hero h2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: clamp(16px, 2.2vw, 22px);
+    color: var(--white);
+    margin-bottom: 20px;
+    letter-spacing: 0.01em;
+  }
+  .hero-body {
+    font-size: 17px;
+    color: var(--text-light);
+    line-height: 1.65;
+    max-width: 640px;
+    margin-bottom: 38px;
+  }
+  .hero-ctas {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 56px;
+  }
+  .hero-trust {
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 30px;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 32px 0 0;
+    margin: 8px 0;
+  }
+  .trust-item:not(:first-child) {
+    padding-left: 32px;
+    border-left: 1px solid rgba(255,255,255,0.12);
+  }
+  .trust-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(9,150,211,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .trust-icon svg { width: 18px; height: 18px; fill: var(--cyan-hero); }
+  .trust-text { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.75); line-height: 1.3; }
+
+  /* ─── ZAHLEN ────────────────────────────────────────────────── */
+  .zahlen { background: var(--cyan-light); }
+  .zahlen-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 70px 24px;
+  }
+  .zahlen-head { margin-bottom: 44px; }
+  .zahlen-head .section-title { color: var(--white); }
+  .zahlen-head .divider { background: rgba(255,255,255,0.5); }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-4px); }
+  .stat-num {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: 58px;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── LEISTUNGEN ────────────────────────────────────────────── */
+  .leistungen { background: var(--white); }
+  .leistungen-head { margin-bottom: 48px; }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .service-card {
+    border-radius: 25px;
+    padding: 40px 34px;
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .service-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+  .card-blue { background: var(--dark-blue); }
+  .card-magenta { background: var(--magenta); }
+  .card-cyan { background: var(--cyan); }
+  .card-icon {
+    width: 52px;
+    height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .card-icon svg { width: 26px; height: 26px; fill: var(--white); }
+  .service-card h3 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .service-card p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 24px;
+    flex: 1;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+  .card-cta {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--white);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1.5px solid rgba(255,255,255,0.4);
+    padding-bottom: 3px;
+    transition: border-color 0.2s;
+    width: fit-content;
+  }
+  .card-cta:hover { border-color: var(--white); }
+
+  /* ─── NIS2 SPOTLIGHT ────────────────────────────────────────── */
+  .nis2 { background: var(--dark-bg); }
+  .nis2-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 90px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .nis2-badge {
+    display: inline-block;
+    background: var(--magenta);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .nis2-left h2 {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: clamp(36px, 4vw, 52px);
+    color: var(--cyan-hero);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 22px;
+  }
+  .nis2-left p {
+    font-size: 16px;
+    color: var(--text-light);
+    line-height: 1.65;
+    margin-bottom: 28px;
+  }
+  .nis2-checklist {
+    list-style: none;
+    margin-bottom: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nis2-checklist li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .check-icon {
+    width: 24px;
+    height: 24px;
+    background: rgba(35,187,234,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .check-icon svg { width: 14px; height: 14px; fill: var(--cyan-hero); }
+  .nis2-card {
+    background: linear-gradient(145deg, #1a2744 0%, #0d1b34 100%);
+    border: 1px solid rgba(9,150,211,0.2);
+    border-radius: 25px;
+    padding: 40px 36px;
+  }
+  .nis2-card-title {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan-light);
+    margin-bottom: 28px;
+  }
+  .nis2-facts { display: flex; flex-direction: column; gap: 20px; }
+  .nis2-fact {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .nis2-fact:last-child { border-bottom: none; padding-bottom: 0; }
+  .fact-num {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+    color: var(--cyan-hero);
+    line-height: 1;
+    min-width: 80px;
+  }
+  .fact-info { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .fact-info strong { display: block; color: var(--white); font-size: 15px; margin-bottom: 3px; }
+
+  /* ─── TRUST ─────────────────────────────────────────────────── */
+  .trust-section { background: var(--white); }
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 48px;
+  }
+  .trust-card {
+    background: var(--gray-light);
+    border-radius: 20px;
+    padding: 32px 26px;
+    border: 1px solid var(--gray-mid);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .trust-card:hover { border-color: var(--cyan); box-shadow: 0 8px 30px rgba(9,150,211,0.1); }
+  .trust-card-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(9,150,211,0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .trust-card-icon svg { width: 24px; height: 24px; fill: var(--cyan); }
+  .trust-card h3 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .trust-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ─── REFERENZEN ────────────────────────────────────────────── */
+  .referenzen { background: var(--gray-light); }
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin: 44px 0 40px;
+  }
+  .ref-card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 36px 24px;
+    text-align: center;
+    border: 1px solid var(--gray-mid);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .ref-card:hover { border-color: var(--cyan); box-shadow: 0 6px 24px rgba(9,150,211,0.1); }
+  .ref-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(9,150,211,0.08);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .ref-icon svg { width: 28px; height: 28px; fill: var(--cyan); }
+  .ref-card h4 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .ref-text { text-align: center; margin-top: 16px; }
+
+  /* ─── CONNEXTA ──────────────────────────────────────────────── */
+  .connexta { background: var(--dark-blue); }
+  .connexta-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 90px 24px;
+  }
+  .connexta-head { margin-bottom: 48px; }
+  .connexta-head .section-title { color: var(--white); }
+  .connexta-head .divider { background: var(--cyan-hero); }
+  .connexta-body {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .connexta-text { font-size: 17px; color: rgba(255,255,255,0.8); line-height: 1.7; margin-bottom: 36px; }
+  .connexta-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .cx-stat {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: background 0.2s;
+  }
+  .cx-stat:hover { background: rgba(255,255,255,0.11); }
+  .cx-num {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+    color: var(--cyan-hero);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .cx-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; }
+  .connexta-badge-area {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 36px 32px;
+    text-align: center;
+  }
+  .cx-badge-title {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .cx-badge-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+    letter-spacing: 0.03em;
+  }
+  .cx-tagline {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--cyan-hero);
+    margin-bottom: 20px;
+  }
+  .luenendonk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(35,187,234,0.12);
+    border: 1px solid rgba(35,187,234,0.3);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cyan-hero);
+  }
+
+  /* ─── CTA BANNER ────────────────────────────────────────────── */
+  .cta-banner {
+    background: linear-gradient(135deg, var(--magenta-dark) 0%, var(--magenta) 50%, #e8188e 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 90% 50%, rgba(255,255,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-inner h2 {
+    font-family: 'Khand', sans-serif;
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 58px);
+    color: var(--white);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 18px;
+  }
+  .cta-inner p { font-size: 18px; color: rgba(255,255,255,0.85); margin-bottom: 36px; }
+  .cta-actions { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+  .cta-phone { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.8); text-decoration: none; }
+  .cta-phone:hover { color: var(--white); }
+
+  /* ─── FOOTER ────────────────────────────────────────────────── */
+  footer { background: var(--dark-2); }
+  .footer-main {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 60px 24px 40px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 48px;
+  }
+  .footer-brand .logo-main { font-family: 'Khand', sans-serif; font-weight: 700; font-size: 28px; color: var(--cyan); }
+  .footer-brand p {
+    font-size: 13.5px;
+    color: #a0a0a0;
+    line-height: 1.65;
+    margin-top: 14px;
+    max-width: 300px;
+  }
+  .footer-col h4 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { font-size: 13.5px; color: #a0a0a0; text-decoration: none; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--white); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 18px 24px;
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .footer-bottom p { font-size: 12.5px; color: #686868; }
+  .footer-legal { display: flex; gap: 20px; }
+  .footer-legal a { font-size: 12.5px; color: #686868; text-decoration: none; }
+  .footer-legal a:hover { color: #a0a0a0; }
+
+  /* ─── RESPONSIVE ────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .cards-grid { grid-template-columns: 1fr; max-width: 560px; margin: 0 auto; }
+    .trust-grid { grid-template-columns: repeat(2, 1fr); }
+    .ref-grid { grid-template-columns: repeat(2, 1fr); }
+    .connexta-body { grid-template-columns: 1fr; gap: 40px; }
+    .nis2-inner { grid-template-columns: 1fr; gap: 40px; }
+    .footer-main { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-phone { display: none; }
+    .trust-grid { grid-template-columns: 1fr; }
+    .ref-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-trust { flex-direction: column; gap: 16px; }
+    .trust-item:not(:first-child) { border-left: none; padding-left: 0; }
+    .footer-main { grid-template-columns: 1fr; }
+    .connexta-stats { grid-template-columns: repeat(2, 1fr); }
+    .section-title { font-size: 30px; }
+  }
+  @media (max-width: 480px) {
+    .ref-grid { grid-template-columns: 1fr; }
+    .hero-ctas { flex-direction: column; }
+    .cta-actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DRAFT BAR
+════════════════════════════════════════════════════════════════ -->
+<div class="draft-bar">
+  <span class="label">Entwurf</span>
+  Inhaltlicher Vorschlag zur Startseiten-Optimierung · Präsentation für den Kunden · Design und Layout gemäß Original beibehalten
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <span class="logo-main">neam</span>
+      <span class="logo-sub">IT-Services</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">IT Services</a></li>
+      <li><a href="#">Informationssicherheit</a></li>
+      <li><a href="#">Penetration Testing</a></li>
+      <li><a href="#">Schulungen</a></li>
+      <li><a href="#">Unternehmen</a></li>
+      <li><a href="#">Kontakt</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="tel:+4952511652-0" class="nav-phone">+49 5251 1652-0</a>
+      <a href="#kontakt" class="btn btn-magenta" style="padding:9px 20px;font-size:13px;">Beratung anfragen</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="anno">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🎯 Conversion + AI SEO</strong>
+      Der Hero kommuniziert sofort die Kernbotschaft: "aus einer Hand". Die Connexta-Badge und Lünendonk-Nennung bauen in den ersten Sekunden Vertrauen auf — bevor der User abspringt. Der klare Subtext mit Zahlen (100+, zertifiziert, deutschlandweit) liefert E-E-A-T-Signale für KI-Systeme.
+    </div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-badge">
+      Teil der Connexta-Gruppe &nbsp;·&nbsp; Lünendonk-Liste 2025 &nbsp;·&nbsp; Rang 18
+    </div>
+    <h1>IT-Sicherheit &<br>IT-Services<br>aus einer Hand.</h1>
+    <h2>Über 100 IT-Experten. Zertifiziert. Praxiserfahren. Deutschlandweit.</h2>
+    <p class="hero-body">Als Spezialist innerhalb der Connexta-Gruppe begleiten wir Unternehmen und öffentliche Einrichtungen von der IT-Infrastruktur bis zur vollständigen Informationssicherheit — alles aus einer Hand, ohne Schnittstellenverluste.</p>
+    <div class="hero-ctas">
+      <a href="#kontakt" class="btn btn-magenta btn-lg">Kostenlos beraten lassen</a>
+      <a href="#leistungen" class="btn btn-outline-cyan btn-lg">Leistungen entdecken</a>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        </div>
+        <span class="trust-text">ISO 9001 &amp; 27001<br>zertifiziert</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="trust-text">BSI-Cybersicherheits-<br>netzwerk</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        </div>
+        <span class="trust-text">Sophos Campaign<br>of the Year 2025</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ZAHLEN & FAKTEN
+════════════════════════════════════════════════════════════════ -->
+<section class="zahlen">
+  <div class="anno anno-dark" style="top:20px;right:20px;">
+    <div class="anno-btn" style="background:rgba(255,255,255,0.3);border-color:rgba(255,255,255,0.5);color:#fff;">i</div>
+    <div class="anno-tooltip">
+      <strong>📊 Authority + Trust</strong>
+      Quantifizierbare Fakten schaffen sofort Glaubwürdigkeit. "#18 Lünendonk" ist eine externe, neutrale Bestätigung — stärker als jedes Eigenlob. KI-Systeme extrahieren diese Zahlen als Fakten und nutzen sie für Rankings in AI-Antworten.
+    </div>
+  </div>
+  <div class="zahlen-inner">
+    <div class="zahlen-head">
+      <div class="divider divider-white"></div>
+      <div class="section-title">NEAM IN ZAHLEN</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">25+</div>
+        <div class="stat-label">Jahre Erfahrung</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100+</div>
+        <div class="stat-label">IT-Fachleute</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">~5.500</div>
+        <div class="stat-label">Kunden in der<br>Connexta-Gruppe</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">#18</div>
+        <div class="stat-label">Lünendonk-Liste 2025<br>IT-Dienstleister Deutschland</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LEISTUNGEN
+════════════════════════════════════════════════════════════════ -->
+<section class="leistungen section-pad" id="leistungen">
+  <div class="anno anno-dark">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🧭 Struktur + Conversion</strong>
+      Statt 18 kleinteiliger Unterseiten: 3 klare Haupt-Bereiche. Das verhindert Orientierungslosigkeit und führt den User gezielt zu seinem Thema. Jede Karte hat einen CTA — kein Dead End.
+    </div>
+  </div>
+  <div class="container">
+    <div class="leistungen-head">
+      <div class="divider"></div>
+      <div class="section-title">WAS WIR FÜR SIE TUN</div>
+      <p class="section-sub">IT-Service und Informationssicherheit aus einer Hand — das ist unser Kern-Versprechen.</p>
+    </div>
+    <div class="cards-grid">
+      <!-- Card 1: IT Services -->
+      <div class="service-card card-blue">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>
+        </div>
+        <h3>IT Services &amp; Infrastruktur</h3>
+        <p>Microsoft 365, Managed IT, Datacenter, Netzwerk und 24/7-Support — wir halten Ihre IT am Laufen und entwickeln sie kontinuierlich weiter.</p>
+        <div class="card-tags">
+          <span class="tag">M365</span>
+          <span class="tag">Managed IT</span>
+          <span class="tag">Datacenter</span>
+          <span class="tag">24/7 Support</span>
+        </div>
+        <a href="#" class="card-cta">Mehr erfahren →</a>
+      </div>
+      <!-- Card 2: Informationssicherheit -->
+      <div class="service-card card-magenta">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        </div>
+        <h3>Informationssicherheit &amp; Compliance</h3>
+        <p>ISO 27001, NIS2, BSI IT-Grundschutz, TISAX, KRITIS — wir beraten, auditieren und zertifizieren. Mit Experten, die täglich in echten Kundenprojekten arbeiten.</p>
+        <div class="card-tags">
+          <span class="tag">ISO 27001</span>
+          <span class="tag">NIS2</span>
+          <span class="tag">KRITIS</span>
+          <span class="tag">TISAX</span>
+        </div>
+        <a href="#" class="card-cta">Mehr erfahren →</a>
+      </div>
+      <!-- Card 3: Schulungen -->
+      <div class="service-card card-cyan">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+        </div>
+        <h3>Schulungen &amp; Security Awareness</h3>
+        <p>BSI- und ISO-zertifizierte Trainings von Praktikern — keine Theorie-Dozenten, sondern Experten aus dem täglichen Kundengeschäft.</p>
+        <div class="card-tags">
+          <span class="tag">ISO 27001</span>
+          <span class="tag">BSI</span>
+          <span class="tag">NIS2</span>
+          <span class="tag">Awareness</span>
+        </div>
+        <a href="#" class="card-cta">Zum Schulungsangebot →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NIS2 SPOTLIGHT
+════════════════════════════════════════════════════════════════ -->
+<section class="nis2">
+  <div class="anno">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🔍 AI SEO + Conversion</strong>
+      NIS2 ist aktuell eines der meistgesuchten B2B-IT-Themen in Deutschland. Eine prominente Hero-Platzierung signalisiert Aktualität und Expertise — beide wichtig für E-E-A-T. Der CTA ist direkt und niedrigschwellig: "Beratung anfragen", nicht "Mehr erfahren".
+    </div>
+  </div>
+  <div class="nis2-inner">
+    <div class="nis2-left">
+      <span class="nis2-badge">Jetzt handeln</span>
+      <h2>NIS2-Richtlinie:<br>Sind Sie bereits<br>compliant?</h2>
+      <p>Die NIS2-Umsetzung ist für tausende Unternehmen in Deutschland verpflichtend. Wir begleiten Sie pragmatisch und effizient durch den gesamten Prozess — von der Gap-Analyse bis zur Zertifizierung.</p>
+      <ul class="nis2-checklist">
+        <li>
+          <div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          Bestandsaufnahme &amp; Gap-Analyse
+        </li>
+        <li>
+          <div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          Maßnahmenplanung &amp; Umsetzungsbegleitung
+        </li>
+        <li>
+          <div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          Schulung Ihrer Mitarbeitenden
+        </li>
+      </ul>
+      <a href="#kontakt" class="btn btn-magenta btn-lg">NIS2-Beratung anfragen</a>
+    </div>
+    <div class="nis2-card">
+      <div class="nis2-card-title">NIS2 — Das sollten Sie wissen</div>
+      <div class="nis2-facts">
+        <div class="nis2-fact">
+          <div class="fact-num">30.000+</div>
+          <div class="fact-info">
+            <strong>Betroffene Unternehmen</strong>
+            in Deutschland fallen unter NIS2-Anforderungen
+          </div>
+        </div>
+        <div class="nis2-fact">
+          <div class="fact-num">10%</div>
+          <div class="fact-info">
+            <strong>Bußgeld vom Jahresumsatz</strong>
+            bei schwerwiegenden Verstößen möglich
+          </div>
+        </div>
+        <div class="nis2-fact">
+          <div class="fact-num">24h</div>
+          <div class="fact-info">
+            <strong>Meldepflicht</strong>
+            für erhebliche Sicherheitsvorfälle gegenüber Behörden
+          </div>
+        </div>
+        <div class="nis2-fact">
+          <div class="fact-num">ISO</div>
+          <div class="fact-info">
+            <strong>27001 als Basis</strong>
+            erleichtert NIS2-Compliance erheblich — neam begleitet beides
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     WARUM NEAM — TRUST
+════════════════════════════════════════════════════════════════ -->
+<section class="trust-section section-pad">
+  <div class="anno anno-dark">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🏅 Authority + Trust (E-E-A-T)</strong>
+      Diese Sektion beantwortet die entscheidende Frage "Warum sollte ich gerade neam wählen?" Jedes Argument ist spezifisch und belegt, kein generisches Eigenlob. Der Connexta-Lünendonk-Hinweis ist ein externer Vertrauensanker — besonders wirksam für skeptische Entscheider.
+    </div>
+  </div>
+  <div class="container">
+    <div class="divider"></div>
+    <div class="section-title">WARUM UNTERNEHMEN UNS VERTRAUEN</div>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+        </div>
+        <h3>Aus einer Hand</h3>
+        <p>IT-Service und vollständige Informationssicherheit ohne externe Schnittstellen. Ein Ansprechpartner, eine Verantwortung.</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        </div>
+        <h3>Connexta-Netzwerk</h3>
+        <p>Als Teil der Connexta-Gruppe (Lünendonk Rang 18) haben Sie Zugang zu 15 spezialisierten IT-Unternehmen — und damit zu Kompetenz in allen IT-Bereichen.</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+        </div>
+        <h3>Öffentlicher Sektor</h3>
+        <p>Langjährige Erfahrung in der Betreuung öffentlicher Einrichtungen, KRITIS-Betreiber und Behörden — mit den dafür notwendigen Zertifizierungen.</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3z"/></svg>
+        </div>
+        <h3>Praxistrainer</h3>
+        <p>Unsere Schulungsexperten arbeiten täglich in echten Kundenprojekten — kein reines Dozententum, sondern Wissen direkt aus der Praxis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     REFERENZEN TEASER
+════════════════════════════════════════════════════════════════ -->
+<section class="referenzen section-pad">
+  <div class="anno anno-dark">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🤝 Social Proof + Conversion</strong>
+      Social Proof ist der stärkste Conversion-Hebel im B2B. Wer sieht, dass ähnliche Unternehmen bereits vertrauen, springt seltener ab. Branchen-Icons signalisieren: "Wir kennen Ihre Welt." Hier sollten echte Kunden-Logos oder anonymisierte Case Studies eingesetzt werden.
+    </div>
+  </div>
+  <div class="container">
+    <div class="divider"></div>
+    <div class="section-title">SIE SIND IN GUTER GESELLSCHAFT</div>
+    <p class="section-sub">Unternehmen und öffentliche Einrichtungen aus verschiedenen Branchen vertrauen auf neam.</p>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+        </div>
+        <h4>Öffentliche Verwaltung</h4>
+      </div>
+      <div class="ref-card">
+        <div class="ref-icon">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        </div>
+        <h4>Gesundheitswesen</h4>
+      </div>
+      <div class="ref-card">
+        <div class="ref-icon">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        </div>
+        <h4>Industrie &amp; Produktion</h4>
+      </div>
+      <div class="ref-card">
+        <div class="ref-icon">
+          <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+        </div>
+        <h4>Finanz &amp; Versicherung</h4>
+      </div>
+    </div>
+    <div class="ref-text">
+      <a href="#" class="btn btn-primary">Alle Referenzen ansehen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONNEXTA GRUPPE
+════════════════════════════════════════════════════════════════ -->
+<section class="connexta">
+  <div class="anno">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🏢 Authority + Differenzierung</strong>
+      Die Connexta-Zugehörigkeit ist ein starkes Differenzierungsmerkmal, das kaum ein Wettbewerber vorweisen kann. Lünendonk Rang 18 ist eine harte, neutrale Zahl. Diese Fakten sollten auf der Startseite sichtbar sein — viele User würden sonst nie davon erfahren.
+    </div>
+  </div>
+  <div class="connexta-inner">
+    <div class="connexta-head">
+      <div class="divider"></div>
+      <div class="section-title">STÄRKE DURCH DEN VERBUND</div>
+    </div>
+    <div class="connexta-body">
+      <div>
+        <p class="connexta-text">Als neam profitieren Sie von der geballten Kompetenz der Connexta-Gruppe: 15 spezialisierte IT-Unternehmen, ~700 Experten, ~5.500 Kunden und ~€180 Mio. Umsatz. neam ist dabei Ihr Spezialist für IT-Security und Infrastruktur — mit direktem Zugang zum gesamten Wissen des Verbunds, u.a. auch im Bereich KI-Einsatz im Unternehmensumfeld.</p>
+        <div class="connexta-stats">
+          <div class="cx-stat">
+            <div class="cx-num">15</div>
+            <div class="cx-label">Unternehmen</div>
+          </div>
+          <div class="cx-stat">
+            <div class="cx-num">~700</div>
+            <div class="cx-label">IT-Experten</div>
+          </div>
+          <div class="cx-stat">
+            <div class="cx-num">~5.500</div>
+            <div class="cx-label">Kunden</div>
+          </div>
+          <div class="cx-stat">
+            <div class="cx-num">#18</div>
+            <div class="cx-label">Lünendonk 2025</div>
+          </div>
+        </div>
+      </div>
+      <div class="connexta-badge-area">
+        <div class="cx-badge-title">CONNEXTA</div>
+        <div class="cx-badge-sub">Unternehmensgruppe</div>
+        <div class="cx-tagline">"IT. Gemeinsam. Stärker."</div>
+        <div class="luenendonk-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          Lünendonk-Liste 2025 · Rang 18
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CTA BANNER
+════════════════════════════════════════════════════════════════ -->
+<section class="cta-banner" id="kontakt">
+  <div class="anno">
+    <div class="anno-btn">i</div>
+    <div class="anno-tooltip">
+      <strong>🚀 Conversion — Abschluss</strong>
+      Der letzte CTA auf der Seite muss klar, niedrigschwellig und direkt sein. "Kostenlos und unverbindlich" nimmt die Hemmschwelle. Zwei Optionen (Formular + Telefon) erhöhen die Wahrscheinlichkeit, dass der User reagiert — unterschiedliche Präferenzen bedienen.
+    </div>
+  </div>
+  <div class="cta-inner">
+    <h2>Bereit für den<br>nächsten Schritt?</h2>
+    <p>Sprechen Sie jetzt mit einem unserer Experten — kostenlos und unverbindlich.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn btn-white btn-lg">Jetzt Beratungsgespräch vereinbaren</a>
+      <a href="tel:+4952511652-0" class="cta-phone">oder +49 5251 1652-0 anrufen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="logo-main">neam</div>
+      <p>neam IT-Services GmbH ist Ihr Spezialist für IT-Services und Informationssicherheit — Teil der Connexta-Gruppe mit über 100 IT-Fachleuten deutschlandweit.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Leistungen</h4>
+      <ul>
+        <li><a href="#">IT Services</a></li>
+        <li><a href="#">Informationssicherheit</a></li>
+        <li><a href="#">Penetration Testing</a></li>
+        <li><a href="#">NIS2-Compliance</a></li>
+        <li><a href="#">Schulungen &amp; Webinare</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Kontakt</h4>
+      <ul>
+        <li><a href="#">Technologiepark 8, 33100 Paderborn</a></li>
+        <li><a href="tel:+4952511652-0">+49 5251 1652-0</a></li>
+        <li><a href="#">info@neam.de</a></li>
+        <li><a href="#">Zum Kontaktformular</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 neam IT-Services GmbH · Teil der Connexta-Gruppe</p>
+    <div class="footer-legal">
+      <a href="#">Impressum</a>
+      <a href="#">Datenschutz</a>
+      <a href="#">Sitemap</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id === '#') return;
+      const el = document.querySelector(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+</script>
+</body>
+</html>
